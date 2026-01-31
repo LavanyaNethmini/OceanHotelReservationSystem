@@ -101,9 +101,7 @@ public class Reservation {
         public Reservation build() {
 
             // ===== Validation =====
-            if (guestId <= 0 || roomId <= 0 || createdBy <= 0) {
-                throw new IllegalStateException("Invalid guest, room, or staff ID");
-            }
+
 
             if (checkIn == null || checkOut == null || checkIn.isAfter(checkOut)) {
                 throw new IllegalStateException("Invalid reservation dates");

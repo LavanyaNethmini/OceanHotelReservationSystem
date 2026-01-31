@@ -1,36 +1,125 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: ASUS
-  Date: 1/28/2026
-  Time: 11:13 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<link rel="stylesheet" href="css/style.css">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Reservation</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
-<div class="card">
-    <h2>New Reservation</h2>
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+    <div class="logo">Ocean View Resort</div>
+    <ul>
+        <li><a href="dashboard.jsp">Dashboard</a></li>
+        <li><a href="viewReservations">Reservations</a></li>
+        <li><a href="logout">Logout</a></li>
+    </ul>
+</div>
 
-    <form action="reserve" method="post">
+<!-- ================= PAGE CONTENT ================= -->
+<div class="container">
+    <div class="card">
 
-        <label>Room ID</label>
-        <input type="number" name="roomId" required>
+        <h2>Create New Reservation</h2>
 
-        <label>Check-in Date</label>
-        <input type="date" name="checkIn" required>
+        <form action="reservation" method="post">
 
-        <label>Check-out Date</label>
-        <input type="date" name="checkOut" required>
+            <!-- ===== Guest Section ===== -->
+            <h3>Guest Details</h3>
 
-        <button type="submit">Reserve</button>
-    </form>
+            <label>Contact Number</label>
+            <input type="text"
+                   id="guestPhone"
+                   name="guestPhone"
+                   placeholder="Enter contact number"
+                   required>
 
-    <% if (request.getAttribute("error") != null) { %>
-    <div class="error"><%= request.getAttribute("error") %></div>
-    <% } %>
+            <p class="hint">
+                If the phone number already exists, the guest details will be reused.
+            </p>
 
-    <div class="link">
-        <a href="dashboard.jsp">← Back to Dashboard</a>
+            <label>Full Name</label>
+            <input type="text"
+                   id="guestName"
+                   name="guestName"
+                   placeholder="Enter guest full name"
+                   required>
+
+            <label>Address</label>
+            <input type="text"
+                   id="guestAddress"
+                   name="guestAddress"
+                   placeholder="Enter guest address"
+                   required>
+
+            <label>Email</label>
+            <input type="email"
+                   id="guestEmail"
+                   name="guestEmail"
+                   placeholder="Enter email address">
+
+            <hr>
+
+            <!-- ===== Reservation Section ===== -->
+            <h3>Reservation Details</h3>
+
+            <label>Room ID</label>
+            <input type="number"
+                   name="roomId"
+                   placeholder="Room number"
+                   required>
+
+            <label>Check-in Date</label>
+            <input type="date"
+                   name="checkIn"
+                   required>
+
+            <label>Check-out Date</label>
+            <input type="date"
+                   name="checkOut"
+                   required>
+
+            <button type="submit">Confirm Reservation</button>
+        </form>
+
+        <%-- Context path for AJAX --%>
+        <script>
+            const contextPath = "<%= request.getContextPath() %>";
+        </script>
+
+        <script>
+            document.getElementById("guestPhone").addEventListener("blur", function () {
+
+                const phone = this.value.replace(/\s+/g, "");
+                if (phone === "") return;
+
+                fetch(contextPath + "/findGuestByPhone?phone=" + encodeURIComponent(phone))
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.exists) {
+                            document.getElementById("guestName").value = data.name;
+                            document.getElementById("guestAddress").value = data.address;
+                            document.getElementById("guestEmail").value = data.email;
+                        }
+                    })
+                    .catch(err => console.error("Guest lookup failed:", err));
+            });
+        </script>
+
+        <!-- ===== Error Message ===== -->
+        <% if (request.getAttribute("error") != null) { %>
+        <div class="error">
+            <%= request.getAttribute("error") %>
+        </div>
+        <% } %>
+
+        <div class="link">
+            <a href="dashboard.jsp">← Back to Dashboard</a>
+        </div>
+
     </div>
 </div>
 
+</body>
+</html>

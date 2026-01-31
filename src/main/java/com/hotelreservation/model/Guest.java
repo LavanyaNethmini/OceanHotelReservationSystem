@@ -2,13 +2,12 @@ package com.hotelreservation.model;
 
 public class Guest {
 
-    private int guestId;
-    private String name;
-    private String address;
-    private String email;
-    private String phone;
+    private final int guestId;     // ✅ DB identity
+    private final String name;
+    private final String address;
+    private final String email;
+    private final String phone;
 
-    // Private constructor (forces use of Builder)
     private Guest(Builder builder) {
         this.guestId = builder.guestId;
         this.name = builder.name;
@@ -17,7 +16,7 @@ public class Guest {
         this.phone = builder.phone;
     }
 
-    // Getters only (immutability after creation)
+    // ========= GETTERS =========
     public int getGuestId() {
         return guestId;
     }
@@ -38,10 +37,10 @@ public class Guest {
         return phone;
     }
 
-    // ===== BUILDER =====
+    // ========= BUILDER =========
     public static class Builder {
 
-        private int guestId;
+        private int guestId; // optional (0 for new guest)
         private String name;
         private String address;
         private String email;
@@ -73,10 +72,17 @@ public class Guest {
         }
 
         public Guest build() {
-            if (name == null || phone == null) {
-                throw new IllegalStateException("Guest name and phone are required");
+
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalStateException("Guest name required");
             }
+
+            if (phone == null || phone.trim().isEmpty()) {
+                throw new IllegalStateException("Guest phone required");
+            }
+
             return new Guest(this);
         }
+
     }
 }

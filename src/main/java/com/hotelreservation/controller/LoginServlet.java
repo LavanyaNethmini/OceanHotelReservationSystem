@@ -23,18 +23,32 @@ public class LoginServlet extends HttpServlet {
         this.userService = new UserService();
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        User user = this.userService.authenticate(username, password);
+
+        User user = userService.authenticate(username, password);
+
         if (user != null) {
             HttpSession session = request.getSession();
+
+            // ✅ Store full user (optional but useful)
             session.setAttribute("loggedUser", user);
+
+            // ✅ Store primitives for easy access
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("role", user.getRole());
+
             response.sendRedirect("dashboard.jsp");
         } else {
             request.setAttribute("error", "Invalid username or password");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("login.jsp")
+                    .forward(request, response);
         }
-
     }
+
+
 }
