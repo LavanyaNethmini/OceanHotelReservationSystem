@@ -1,6 +1,9 @@
 package com.hotelreservation.service;
 
+import com.hotelreservation.factory.ReservationFactory;
+import com.hotelreservation.model.Guest;
 import com.hotelreservation.model.Reservation;
+import com.hotelreservation.repository.GuestRepository;
 import com.hotelreservation.repository.ReservationRepository;
 
 import java.time.LocalDate;
@@ -8,25 +11,52 @@ import java.util.List;
 
 public class ReservationService {
 
-    private final ReservationRepository repository =
+    private final GuestRepository guestRepository =
+            new GuestRepository();
+
+    private final ReservationRepository reservationRepository =
             new ReservationRepository();
 
-    public boolean createReservation(Reservation reservation) {
+    /**
+     * Creates a reservation by first saving the guest and then
+     * creating the reservation linked to that guest.
+     */
+    public boolean createReservation(
+            Guest guest,
+            int roomId,
+            LocalDate checkIn,
+            LocalDate checkOut,
+            int staffId) {
 
-        if (reservation == null) return false;
+        // ===== Business Validation =====
+        if (guest == null || staffId <= 0 || roomId <= 0) {
+            return false;
+        }
 
-        if (reservation.getGuestId() <= 0 ||
-                reservation.getRoomId() <= 0) return false;
+        if (checkIn == null || checkOut == null || checkIn.isAfter(checkOut)) {
+            return false;
+        }
 
-        LocalDate in = reservation.getCheckIn();
-        LocalDate out = reservation.getCheckOut();
+        // ===== Persist Guest =====
+        int guestId = guestRepository.saveGuest(guest);
 
-        if (in == null || out == null || in.isAfter(out)) return false;
+        if (guestId <= 0) {
+            return false;
+        }
 
-        return repository.saveReservation(reservation);
+        // ===== Create Reservation via Factory =====
+        Reservation reservation =
+                ReservationFactory.createReservation(
+                        guestId, roomId, checkIn, checkOut, staffId);
+
+        // ===== Persist Reservation =====
+        return reservationRepository.saveReservation(reservation);
     }
 
+    /**
+     * Retrieves all reservations.
+     */
     public List<Reservation> getAllReservations() {
-        return repository.getAllReservations();
+        return reservationRepository.getAllReservations();
     }
 }
