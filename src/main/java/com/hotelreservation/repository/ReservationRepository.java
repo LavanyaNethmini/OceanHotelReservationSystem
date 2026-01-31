@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,4 +68,33 @@ public class ReservationRepository {
 
         return list;
     }
+
+    public boolean isRoomAvailable(
+            int roomId,
+            LocalDate checkIn,
+            LocalDate checkOut
+    ) {
+
+        String sql =
+                "SELECT 1 FROM reservations " +
+                        "WHERE room_id = ? " +
+                        "AND check_in < ? " +
+                        "AND check_out > ?";
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, roomId);
+            ps.setDate(2, Date.valueOf(checkOut));
+            ps.setDate(3, Date.valueOf(checkIn));
+
+            ResultSet rs = ps.executeQuery();
+            return !rs.next(); // true = available
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

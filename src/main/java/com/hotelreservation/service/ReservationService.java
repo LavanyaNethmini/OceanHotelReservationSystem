@@ -4,6 +4,7 @@ import com.hotelreservation.model.Guest;
 import com.hotelreservation.model.Reservation;
 import com.hotelreservation.repository.GuestRepository;
 import com.hotelreservation.repository.ReservationRepository;
+import com.hotelreservation.repository.RoomRepository;
 
 import java.util.List;
 
@@ -15,32 +16,51 @@ public class ReservationService {
     private final GuestRepository guestRepository =
             new GuestRepository();
 
+    private final RoomRepository roomRepository =
+            new RoomRepository();
+
     // ============================
-// CREATE reservation + guest
-// ============================
+    // CREATE reservation + guest
+    // ============================
     public boolean createReservationWithGuest(
             Guest guest,
             Reservation reservation
     ) {
 
-        int guestId;
+        // 1️⃣ Validate room exists
+        if (!roomRepository.existsById(reservation.getRoomId())) {
+            throw new IllegalStateException("Room does not exist");
+        }
 
-        // 1️⃣ Check if guest already exists (by phone)
+        // 2️⃣ Check room availability
+        boolean available =
+                reservationRepository.isRoomAvailable(
+                        reservation.getRoomId(),
+                        reservation.getCheckIn(),
+                        reservation.getCheckOut()
+                );
+
+        if (!available) {
+            throw new IllegalStateException(
+                    "Room is not available for selected dates"
+            );
+        }
+
+        // 3️⃣ Handle guest (reuse by phone)
+        int guestId;
         Guest existingGuest =
                 guestRepository.findByPhone(guest.getPhone());
 
         if (existingGuest != null) {
-            // Reuse existing guest
             guestId = existingGuest.getGuestId();
         } else {
-            // Save new guest
             guestId = guestRepository.saveGuest(guest);
             if (guestId <= 0) {
                 return false;
             }
         }
 
-        // 2️⃣ Build reservation with correct guestId
+        // 4️⃣ Build final reservation (Builder pattern)
         Reservation finalReservation =
                 new Reservation.Builder()
                         .setGuestId(guestId)
@@ -51,12 +71,12 @@ public class ReservationService {
                         .setCreatedBy(reservation.getCreatedBy())
                         .build();
 
-        // 3️⃣ Save reservation
+        // 5️⃣ Save reservation
         return reservationRepository.saveReservation(finalReservation);
     }
 
     // ============================
-    // VIEW reservations (FIX 🔥)
+    // VIEW reservations
     // ============================
     public List<Reservation> getAllReservations() {
         return reservationRepository.getAllReservations();
