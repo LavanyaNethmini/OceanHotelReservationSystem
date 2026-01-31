@@ -1,45 +1,82 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.hotelreservation.model;
 
 public class Guest {
+
     private int guestId;
     private String name;
+    private String address;
     private String email;
     private String phone;
 
-    public int getGuestId() {
-        return this.guestId;
+    // Private constructor (forces use of Builder)
+    private Guest(Builder builder) {
+        this.guestId = builder.guestId;
+        this.name = builder.name;
+        this.address = builder.address;
+        this.email = builder.email;
+        this.phone = builder.phone;
     }
 
-    public void setGuestId(int guestId) {
-        this.guestId = guestId;
+    // Getters only (immutability after creation)
+    public int getGuestId() {
+        return guestId;
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getAddress() {
+        return address;
     }
 
     public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+        return email;
     }
 
     public String getPhone() {
-        return this.phone;
+        return phone;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    // ===== BUILDER =====
+    public static class Builder {
+
+        private int guestId;
+        private String name;
+        private String address;
+        private String email;
+        private String phone;
+
+        public Builder setGuestId(int guestId) {
+            this.guestId = guestId;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setAddress(String address) {
+            this.address = address;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setPhone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Guest build() {
+            if (name == null || phone == null) {
+                throw new IllegalStateException("Guest name and phone are required");
+            }
+            return new Guest(this);
+        }
     }
 }
