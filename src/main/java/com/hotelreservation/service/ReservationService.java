@@ -1,22 +1,32 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.hotelreservation.service;
 
 import com.hotelreservation.model.Reservation;
 import com.hotelreservation.repository.ReservationRepository;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class ReservationService {
-    private ReservationRepository reservationRepository = new ReservationRepository();
+
+    private final ReservationRepository repository =
+            new ReservationRepository();
 
     public boolean createReservation(Reservation reservation) {
-        return this.reservationRepository.saveReservation(reservation);
+
+        if (reservation == null) return false;
+
+        if (reservation.getGuestId() <= 0 ||
+                reservation.getRoomId() <= 0) return false;
+
+        LocalDate in = reservation.getCheckIn();
+        LocalDate out = reservation.getCheckOut();
+
+        if (in == null || out == null || in.isAfter(out)) return false;
+
+        return repository.saveReservation(reservation);
     }
 
     public List<Reservation> getAllReservations() {
-        return this.reservationRepository.getAllReservations();
+        return repository.getAllReservations();
     }
 }
