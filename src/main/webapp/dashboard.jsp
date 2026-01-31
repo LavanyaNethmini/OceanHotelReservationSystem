@@ -1,43 +1,70 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: ASUS
-  Date: 1/28/2026
-  Time: 10:09 PM
-  To change this template use File | Settings | File Templates.
---%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.hotelreservation.model.User" %>
+
 <%
-    User user = (User) session.getAttribute("loggedUser");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
+    // =========================
+    // Session & Auth check
+    // =========================
+    String ctx = request.getContextPath();
+    User loggedUser = (User) session.getAttribute("loggedUser");
+
+    if (loggedUser == null) {
+        response.sendRedirect(ctx + "/login.jsp");
         return;
     }
 %>
 
-<link rel="stylesheet" href="css/style.css">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="<%= ctx %>/css/style.css">
+</head>
+<body>
 
-<!-- NAVBAR -->
+<!-- ================= NAVBAR ================= -->
 <div class="navbar">
-    <div class="logo">Hotel Reservation System</div>
+    <div class="logo">Ocean View Resort</div>
 
     <ul>
-        <li><a href="dashboard.jsp">Dashboard</a></li>
-        <li><a href="reservation.jsp">Reservation</a></li>
-        <li><a href="<%= request.getContextPath() %>/viewReservations">Reports</a></li>
-        <li><a href="logout">Logout</a></li>
+        <li><a href="<%= ctx %>/dashboard.jsp">Dashboard</a></li>
+        <li><a href="<%= ctx %>/reservation.jsp">New Reservation</a></li>
+        <li><a href="<%= ctx %>/viewReservations">Reservations</a></li>
+
+        <%-- 🔐 ADMIN ONLY MENU --%>
+        <% if ("ADMIN".equals(loggedUser.getRole())) { %>
+        <li><a href="<%= ctx %>/users">Manage Users</a></li>
+        <li><a href="<%= ctx %>/reports">Reports</a></li>
+        <% } %>
+
+        <li><a href="<%= ctx %>/logout">Logout</a></li>
     </ul>
 </div>
 
-<!-- PAGE CONTENT -->
+<!-- ================= PAGE CONTENT ================= -->
 <div class="page-container">
-    <div class="dashboard-card">
-        <h2>Welcome, <%= user.getFullName() %></h2>
-        <p><strong>Role:</strong> <%= user.getRole() %></p>
+    <div class="card">
+
+        <h2>Welcome, <%= loggedUser.getFullName() %></h2>
+
+        <p>
+            <strong>Role:</strong>
+            <span style="color:#1e3c72; font-weight:bold;">
+                <%= loggedUser.getRole() %>
+            </span>
+        </p>
 
         <p style="margin-top:20px;">
-            Use the menu above to manage reservations and reports.
+            Use the menu above to manage reservations
+            <% if ("ADMIN".equals(loggedUser.getRole())) { %>
+            , users, and reports.
+            <% } else { %>
+            and guest details.
+            <% } %>
         </p>
+
     </div>
 </div>
 
-
+</body>
+</html>
